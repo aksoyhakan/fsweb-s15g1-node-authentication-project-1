@@ -1,6 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
+const session = require("express-session");
+const userRoutes = require("./users/users-router");
+const authRoutes = require("./auth/auth-router");
 
 /**
   Kullanıcı oturumlarını desteklemek için `express-session` paketini kullanın!
@@ -21,15 +25,17 @@ server.use(helmet());
 server.use(express.json());
 server.use(cors());
 
-server.get("/", (req, res) => {
-  res.json({ api: "up" });
-});
+server.use(
+  session({
+    name: "cikolatacips",
+    secret: "this session secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false },
+  })
+);
 
-server.use((err, req, res, next) => { // eslint-disable-line
-  res.status(err.status || 500).json({
-    message: err.message,
-    stack: err.stack,
-  });
-});
+server.use("/api/users", userRoutes);
+server.use("/api/auth", authRoutes);
 
 module.exports = server;
